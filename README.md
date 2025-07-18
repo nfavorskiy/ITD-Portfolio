@@ -73,5 +73,3 @@ You can verify access control and IDOR prevention by visiting these pages in the
 ## Summary
 
 This application enforces strict access control and session security, ensuring users can only access or modify their own data, effectively preventing IDOR and session hijacking. All features are documented above for easy verification.
-
-**For more details, see the source code in the respective controller and
