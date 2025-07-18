@@ -1,0 +1,33 @@
+/* Custom form styles */
+.form-control {
+    border-width: 2px !important;
+    border-color: #6c757d !important;
+}
+
+.form-control:focus {
+    border-width: 2px !important;
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+.form-check-input {
+    border-width: 2px !important;
+    border-color: #6c757d !important;
+}
+
+.form-check-input:focus {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+.gap-3 {
+    gap: 1rem !important;
+}
+
+/* Underline active nav-link with primary color */
+.nav-item.active > .nav-link {
+    border-bottom: 2px solid var(--bs-primary);
+    padding-bottom: 2px;
+    text-decoration: none;
+    color: white !important;
+}
