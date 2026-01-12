@@ -8,28 +8,33 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ProfileController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
-     * Display the user's profile form.
+     * Display the user's profile.
      */
     public function index(Request $request): View
     {
+        $this->authorize('view', $request->user());
+
         return view('profile.index', [
             'user' => $request->user(),
-            'emailVerified' => $request->user()->hasVerifiedEmail()
         ]);
     }
 
     /**
-     * Show the profile settings form.
+     * Display the user's profile settings form.
      */
     public function settings(Request $request): View
     {
+        $this->authorize('update', $request->user());
+
         return view('profile.settings', [
             'user' => $request->user(),
-            'emailVerified' => $request->user()->hasVerifiedEmail()
         ]);
     }
 
@@ -38,23 +43,17 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $user = $request->user();
-        $user->fill($request->validated());
+        $this->authorize('update', $request->user());
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-            $user->save();
+        $request->user()->fill($request->validated());
 
-            // Send verification email
-            $user->sendEmailVerificationNotification();
-
-            // Redirect to verify email page
-            return Redirect::route('verification.notice')->with('status', 'verification-link-sent');
+        if ($request->user()->isDirty('email')) {
+            $request->user()->email_verified_at = null;
         }
 
-        $user->save();
+        $request->user()->save();
 
-        return Redirect::route('profile.index')->with('status', 'profile-updated');
+        return Redirect::route('profile.settings')->with('status', 'profile-updated');
     }
 
     /**
@@ -62,7 +61,9 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
+        $this->authorize('delete', $request->user());
+
+        $request->validate([
             'password' => ['required', 'current_password'],
         ]);
 
@@ -70,17 +71,16 @@ class ProfileController extends Controller
 
         Auth::logout();
 
+        // Soft delete - mark as deleted instead of actually deleting
         $user->update([
-            'name' => 'Deleted User' . $user->id,
-            'email' => 'deleted_' . $user->id . '@deleted.com',
-            'password' => bcrypt('deleted_account'),
             'is_deleted' => true,
-            'deleted_at' => now(),
+            'email' => $user->email . '_deleted_' . time(),
+            'name' => $user->name . '_deleted_' . time(),
         ]);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/')->with('account_deleted', 'Your account has been permanently deleted.');
+        return Redirect::to('/');
     }
 }

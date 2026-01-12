@@ -3,7 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Session\TokenMismatchException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 
@@ -15,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        $middleware->web(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle CSRF token mismatch
@@ -30,22 +35,33 @@ return Application::configure(basePath: dirname(__DIR__))
             return redirect()->guest(route('login'));
         });
 
-        // Handle 403 errors
+        // Handle AuthorizationException (from Gate/Policy)
         $exceptions->render(function (AuthorizationException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
             return response()->view('errors.403', [], 403);
         });
-        
-        // Handle 404 errors
-        $exceptions->render(function (NotFoundHttpException $e, $request) {
-            return response()->view('errors.404', [], 404);
-        });
 
-        // Handle 500 errors
-        $exceptions->render(function (Exception $e, $request) {
-            if ($e instanceof \ErrorException || $e instanceof \Error || $e instanceof \Throwable) {
+        // Handle HTTP exceptions (abort(403), abort(404), etc.)
+        $exceptions->render(function (HttpException $e, $request) {
+            $status = $e->getStatusCode();
+            
+            if ($status === 403) {
+                return response()->view('errors.403', [], 403);
+            }
+            
+            if ($status === 404) {
+                return response()->view('errors.404', [], 404);
+            }
+            
+            if ($status === 500) {
                 return response()->view('errors.500', [
                     'exception' => config('app.debug') ? $e : null,
                 ], 500);
             }
+            
+            // Let Laravel handle other HTTP status codes
+            return null;
         });
     })->create();

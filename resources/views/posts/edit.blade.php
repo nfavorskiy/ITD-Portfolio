@@ -32,7 +32,7 @@
         </div>
 
         <button type="submit" class="btn btn-success">Update Post</button>
-        <a href="{{ route('posts.index') }}" class="btn btn-secondary">Cancel</a>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
     </form>
 </div>
 @endsection

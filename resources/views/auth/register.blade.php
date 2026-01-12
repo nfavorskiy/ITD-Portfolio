@@ -1,5 +1,4 @@
 <x-guest-layout :title="'Sign Up - ' . config('app.name')">
-    <!-- Error notification for failed registration -->
     @if($errors->any() || session('registration_failed'))
         <div id="registration-error-notification" class="alert alert-danger alert-dismissible fade show position-fixed" style="top: 62px; right: 20px; z-index: 1050; min-width: 300px;">
             <strong>Failed!</strong> Please make changes to the form and try again.
@@ -36,10 +35,8 @@
                 <label for="password" class="form-label">Password<span class="text-danger">*</span></label>
                 <input id="password" class="form-control @error('password') is-invalid @enderror" type="password" name="password" autocomplete="new-password" placeholder="Create a secure password">
                 
-                <!-- Password feedback for empty field -->
                 <div id="password-feedback" class="small mt-1" style="display: none;"></div>
 
-                <!-- Password Requirements Checklist -->
                 <div id="password-requirements" class="small mt-2" style="display: none;">
                     <div class="mb-1 text-muted">Password must contain:</div>
                     <ul class="list-unstyled mb-0">
@@ -83,7 +80,7 @@
         </form>
     </div>
 
-    <script>
+    <script nonce="{{ $cspNonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         const nameInput = document.getElementById('name');
         const nameFeedback = document.getElementById('name-feedback');
@@ -104,18 +101,14 @@
         let nameDebounceTimer;
         let emailDebounceTimer;
 
-        // Check if there are server errors
         const hasServerErrors = document.querySelectorAll('.server-error').length > 0;
         
-        // If no server errors, disable button initially
         if (!hasServerErrors) {
             registerBtn.disabled = true;
         }
 
-        // Auto-dismiss error notification after 5 seconds
         const errorNotification = document.getElementById('registration-error-notification');
         if (errorNotification) {
-            // Manual close functionality
             const closeBtn = errorNotification.querySelector('.btn-close');
             if (closeBtn) {
                 closeBtn.addEventListener('click', function() {
@@ -123,7 +116,6 @@
                 });
             }
             
-            // Auto-dismiss after 10 seconds
             setTimeout(() => {
                 if (errorNotification && errorNotification.parentNode) {
                     errorNotification.remove();
@@ -131,7 +123,6 @@
             }, 10000);
         }
 
-        // Function to hide server error for a specific field
         function hideServerError(fieldName) {
             const serverError = document.querySelector(`.server-error[data-field="${fieldName}"]`);
             if (serverError) {
@@ -139,7 +130,6 @@
             }
         }
 
-        // Function to show client feedback if no server error is visible
         function showClientFeedback(fieldName, feedbackElement) {
             const serverError = document.querySelector(`.server-error[data-field="${fieldName}"]`);
             const serverErrorVisible = serverError && serverError.style.display !== 'none';
@@ -149,14 +139,9 @@
             }
         }
 
-        // Name validation
         nameInput.addEventListener('input', function() {
             clearTimeout(nameDebounceTimer);
-            
-            // Hide server error when user starts typing
             hideServerError('name');
-            
-            // Reset feedback
             nameFeedback.style.display = 'none';
             if (nameLoading) nameLoading.style.display = 'none';
             nameInput.classList.remove('is-invalid', 'is-valid');
@@ -164,7 +149,6 @@
             
             const name = String(this.value).trim();
             
-            // Check if name is empty
             if (name.length === 0) {
                 nameFeedback.textContent = 'Please enter your username.';
                 nameFeedback.className = 'small mt-1 text-danger';
@@ -174,7 +158,6 @@
                 return;
             }
 
-            // Check if name exceeds 255 characters
             if (name.length > 255) {
                 nameFeedback.textContent = 'Username must not exceed 255 characters.';
                 nameFeedback.className = 'small mt-1 text-danger';
@@ -184,10 +167,8 @@
                 return;
             }
             
-            // Show loading indicator
             if (nameLoading) nameLoading.style.display = 'block';
             
-            // Debounce the API call
             nameDebounceTimer = setTimeout(() => {
                 checkNameAvailability(name);
             }, 300);
@@ -196,7 +177,6 @@
         nameInput.addEventListener('blur', function() {
             const name = String(this.value).trim();
             
-            // Check if name is empty when user leaves the field
             if (name.length === 0) {
                 nameFeedback.textContent = 'Please enter your username.';
                 nameFeedback.className = 'small mt-1 text-danger';
@@ -207,7 +187,6 @@
                 return;
             }
 
-            // Check if name exceeds 255 characters on blur
             if (name.length > 255) {
                 nameFeedback.textContent = 'Username must not exceed 255 characters.';
                 nameFeedback.className = 'small mt-1 text-danger';
@@ -218,14 +197,9 @@
             }
         });
 
-        // Email validation
         emailInput.addEventListener('input', function() {
             clearTimeout(emailDebounceTimer);
-            
-            // Hide server error when user starts typing
             hideServerError('email');
-            
-            // Reset feedback
             emailFeedback.style.display = 'none';
             if (emailLoading) emailLoading.style.display = 'none';
             emailInput.classList.remove('is-invalid', 'is-valid');
@@ -233,7 +207,6 @@
             
             const email = String(this.value).trim();
             
-            // Check if email is empty
             if (email.length === 0) {
                 emailFeedback.textContent = 'Please enter your email address.';
                 emailFeedback.className = 'small mt-1 text-danger';
@@ -243,7 +216,6 @@
                 return;
             }
 
-            // Check if email exceeds 255 characters
             if (email.length > 255) {
                 emailFeedback.textContent = 'Email must not exceed 255 characters.';
                 emailFeedback.className = 'small mt-1 text-danger';
@@ -253,10 +225,8 @@
                 return;
             }
             
-            // Strict email format check - same as backend
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                // Show invalid format error immediately
                 emailFeedback.textContent = 'Please enter a valid email address (e.g., user@example.com).';
                 emailFeedback.className = 'small mt-1 text-danger';
                 showClientFeedback('email', emailFeedback);
@@ -265,10 +235,8 @@
                 return;
             }
             
-            // Show loading indicator for valid format emails
             if (emailLoading) emailLoading.style.display = 'block';
             
-            // Debounce the API call
             emailDebounceTimer = setTimeout(() => {
                 checkEmailAvailability(email);
             }, 300);
@@ -277,7 +245,6 @@
         emailInput.addEventListener('blur', function() {
             const email = String(this.value).trim();
             
-            // Check if email is empty when user leaves the field
             if (email.length === 0) {
                 emailFeedback.textContent = 'Please enter your email address.';
                 emailFeedback.className = 'small mt-1 text-danger';
@@ -288,22 +255,18 @@
             }
         });
 
-        // Password validation
         passwordInput.addEventListener('focus', function() {
-            // Hide server error when user focuses on password
             hideServerError('password');
             passwordRequirements.style.display = 'block';
         });
 
         passwordInput.addEventListener('input', function() {
-            // Hide server error when user starts typing
             hideServerError('password');
             validatePassword();
             validatePasswordConfirmation();
         });
 
         passwordInput.addEventListener('blur', function() {
-            // Check if password is empty when user leaves the field
             if (passwordInput.value.length === 0) {
                 passwordRequirements.style.display = 'none';
                 passwordFeedback.textContent = 'Please enter your password.';
@@ -314,15 +277,12 @@
             }
         });
 
-        // Password confirmation validation
         passwordConfirmationInput.addEventListener('input', function() {
-            // Hide server error when user starts typing
             hideServerError('password_confirmation');
             validatePasswordConfirmation();
         });
 
         passwordConfirmationInput.addEventListener('blur', function() {
-            // Check if password confirmation is empty when user leaves the field
             if (passwordConfirmationInput.value.length === 0) {
                 passwordConfirmationFeedback.textContent = 'Please confirm your password.';
                 passwordConfirmationFeedback.className = 'small mt-1 text-danger';
@@ -334,65 +294,51 @@
 
         function validatePassword() {
             const password = passwordInput.value;
-
-            // Reset feedback
             passwordFeedback.style.display = 'none';
 
-            // Check if password is empty
             if (password.length === 0) {
                 passwordRequirements.style.display = 'none';
                 passwordFeedback.textContent = 'Please enter your password.';
                 passwordFeedback.className = 'small mt-1 text-danger';
                 showClientFeedback('password', passwordFeedback);
                 passwordInput.classList.add('is-invalid');
-                
-                // Reset all requirements to invalid state when password is empty
                 updateRequirement('req-length', false);
                 updateRequirement('req-uppercase', false);
                 updateRequirement('req-lowercase', false);
                 updateRequirement('req-number', false);
                 updateRequirement('req-special', false);
-                
                 updateRegisterButton();
                 return;
             }
             
-            // Show requirements when user starts typing
             if (password.length > 0) {
                 passwordRequirements.style.display = 'block';
             }
             
-            // Reset password input styling
             passwordInput.classList.remove('is-invalid', 'is-valid');
             
             let allValid = true;
             
-            // Check length
             const lengthValid = password.length >= 8 && password.length <= 255;
             updateRequirement('req-length', lengthValid);
             if (!lengthValid) allValid = false;
             
-            // Check for uppercase letter
             const uppercaseValid = /[A-Z]/.test(password);
             updateRequirement('req-uppercase', uppercaseValid);
             if (!uppercaseValid) allValid = false;
             
-            // Check for lowercase letter
             const lowercaseValid = /[a-z]/.test(password);
             updateRequirement('req-lowercase', lowercaseValid);
             if (!lowercaseValid) allValid = false;
             
-            // Check for number
             const numberValid = /\d/.test(password);
             updateRequirement('req-number', numberValid);
             if (!numberValid) allValid = false;
             
-            // Check for special character
             const specialValid = /[^a-zA-Z0-9\s]/.test(password);
             updateRequirement('req-special', specialValid);
             if (!specialValid) allValid = false;
             
-            // Update password input styling
             if (password.length > 0) {
                 if (allValid) {
                     passwordInput.classList.add('is-valid');
@@ -421,7 +367,6 @@
             const password = passwordInput.value;
             const confirmation = passwordConfirmationInput.value;
             
-            // Reset feedback
             passwordConfirmationFeedback.style.display = 'none';
             passwordConfirmationInput.classList.remove('is-invalid', 'is-valid');
             
@@ -462,7 +407,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                // Hide loading
                 if (nameLoading) nameLoading.style.display = 'none';
                 
                 if (data.available === false) {
@@ -501,7 +445,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                // Hide loading
                 if (emailLoading) emailLoading.style.display = 'none';
                 
                 if (data.available === false) {
@@ -528,25 +471,21 @@
         }
 
         function updateRegisterButton() {
-            // Check if any field has is-invalid class or is empty
             const nameInvalid = nameInput.classList.contains('is-invalid');
             const emailInvalid = emailInput.classList.contains('is-invalid');
             const passwordInvalid = passwordInput.classList.contains('is-invalid');
             const confirmationInvalid = passwordConfirmationInput.classList.contains('is-invalid');
             
-            // Check if required fields are empty
             const nameEmpty = nameInput.value.trim() === '';
             const emailEmpty = emailInput.value.trim() === '';
             const passwordEmpty = passwordInput.value === '';
             const confirmationEmpty = passwordConfirmationInput.value === '';
             
-            // Check if fields have valid status
             const nameValid = nameInput.classList.contains('is-valid');
             const emailValid = emailInput.classList.contains('is-valid');
             const passwordValid = passwordInput.classList.contains('is-valid');
             const confirmationValid = passwordConfirmationInput.classList.contains('is-valid');
             
-            // If there are server errors, allow submission to show them
             const hasVisibleServerErrors = Array.from(document.querySelectorAll('.server-error'))
                 .some(error => error.style.display !== 'none');
             
@@ -555,7 +494,6 @@
                 return;
             }
             
-            // Button should only be enabled if all fields are valid and none are empty
             const shouldEnable = nameValid && emailValid && passwordValid && confirmationValid && 
                                 !nameEmpty && !emailEmpty && !passwordEmpty && !confirmationEmpty &&
                                 !nameInvalid && !emailInvalid && !passwordInvalid && !confirmationInvalid;

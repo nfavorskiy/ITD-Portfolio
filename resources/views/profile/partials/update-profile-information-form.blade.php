@@ -49,71 +49,73 @@
             @endif
         </div>
     </form>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const nameInput = document.getElementById('name');
-        const nameFeedback = document.getElementById('name-feedback');
-        const emailInput = document.getElementById('email');
-        const emailFeedback = document.getElementById('email-feedback');
-        const saveBtn = document.getElementById('save-profile-btn');
-        const originalEmail = '{{ $user->email }}';
-
-        nameInput.addEventListener('input', function() {
-            const name = this.value.trim();
-            
-            nameFeedback.style.display = 'none';
-            nameInput.classList.remove('is-invalid', 'is-valid');
-            
-            if (name.length === 0) {
-                nameFeedback.textContent = 'Please enter your name.';
-                nameFeedback.className = 'small mt-1 text-danger';
-                nameFeedback.style.display = 'block';
-                nameInput.classList.add('is-invalid');
-            } else {
-                nameFeedback.textContent = '✓ Name is valid';
-                nameFeedback.className = 'small mt-1 text-success';
-                nameFeedback.style.display = 'block';
-                nameInput.classList.add('is-valid');
-            }
-            updateSaveButton();
-        });
-
-        emailInput.addEventListener('input', function() {
-            const email = this.value.trim();
-            
-            emailFeedback.style.display = 'none';
-            emailInput.classList.remove('is-invalid', 'is-valid');
-            
-            if (email.length === 0) {
-                emailFeedback.textContent = 'Please enter your email address.';
-                emailFeedback.className = 'small mt-1 text-danger';
-                emailFeedback.style.display = 'block';
-                emailInput.classList.add('is-invalid');
-            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                emailFeedback.textContent = 'Please enter a valid email address.';
-                emailFeedback.className = 'small mt-1 text-danger';
-                emailFeedback.style.display = 'block';
-                emailInput.classList.add('is-invalid');
-            } else {
-                if (email === originalEmail) {
-                    emailFeedback.textContent = '✓ Current email address';
-                    emailFeedback.className = 'small mt-1 text-info';
-                } else {
-                    emailFeedback.textContent = '✓ Valid email format';
-                    emailFeedback.className = 'small mt-1 text-success';
-                }
-                emailFeedback.style.display = 'block';
-                emailInput.classList.add('is-valid');
-            }
-            updateSaveButton();
-        });
-
-        function updateSaveButton() {
-            const nameInvalid = nameInput.classList.contains('is-invalid');
-            const emailInvalid = emailInput.classList.contains('is-invalid');
-            saveBtn.disabled = nameInvalid || emailInvalid;
-        }
-    });
-    </script>
 </section>
+
+@push('scripts')
+<script nonce="{{ $cspNonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const nameFeedback = document.getElementById('name-feedback');
+    const emailInput = document.getElementById('email');
+    const emailFeedback = document.getElementById('email-feedback');
+    const saveBtn = document.getElementById('save-profile-btn');
+    const originalEmail = '{{ $user->email }}';
+
+    nameInput.addEventListener('input', function() {
+        const name = this.value.trim();
+        
+        nameFeedback.style.display = 'none';
+        nameInput.classList.remove('is-invalid', 'is-valid');
+        
+        if (name.length === 0) {
+            nameFeedback.textContent = 'Please enter your name.';
+            nameFeedback.className = 'small mt-1 text-danger';
+            nameFeedback.style.display = 'block';
+            nameInput.classList.add('is-invalid');
+        } else {
+            nameFeedback.textContent = '✓ Name is valid';
+            nameFeedback.className = 'small mt-1 text-success';
+            nameFeedback.style.display = 'block';
+            nameInput.classList.add('is-valid');
+        }
+        updateSaveButton();
+    });
+
+    emailInput.addEventListener('input', function() {
+        const email = this.value.trim();
+        
+        emailFeedback.style.display = 'none';
+        emailInput.classList.remove('is-invalid', 'is-valid');
+        
+        if (email.length === 0) {
+            emailFeedback.textContent = 'Please enter your email address.';
+            emailFeedback.className = 'small mt-1 text-danger';
+            emailFeedback.style.display = 'block';
+            emailInput.classList.add('is-invalid');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            emailFeedback.textContent = 'Please enter a valid email address.';
+            emailFeedback.className = 'small mt-1 text-danger';
+            emailFeedback.style.display = 'block';
+            emailInput.classList.add('is-invalid');
+        } else {
+            if (email === originalEmail) {
+                emailFeedback.textContent = '✓ Current email address';
+                emailFeedback.className = 'small mt-1 text-info';
+            } else {
+                emailFeedback.textContent = '✓ Valid email format';
+                emailFeedback.className = 'small mt-1 text-success';
+            }
+            emailFeedback.style.display = 'block';
+            emailInput.classList.add('is-valid');
+        }
+        updateSaveButton();
+    });
+
+    function updateSaveButton() {
+        const nameInvalid = nameInput.classList.contains('is-invalid');
+        const emailInvalid = emailInput.classList.contains('is-invalid');
+        saveBtn.disabled = nameInvalid || emailInvalid;
+    }
+});
+</script>
+@endpush

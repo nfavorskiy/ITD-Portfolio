@@ -16,7 +16,6 @@
             <div class="mb-3">
                 <label for="password" class="form-label">New Password</label>
                 <input id="password" class="form-control @error('password') is-invalid @enderror" type="password" name="password" required autocomplete="new-password">
-                <!-- Password Requirements Checklist -->
                 <div id="password-requirements" class="small mt-2" style="display: none;">
                     <div class="mb-1 text-muted">Password must contain:</div>
                     <ul class="list-unstyled mb-0">
@@ -50,7 +49,7 @@
             <button type="submit" class="btn btn-success w-100" id="reset-btn">Reset Password</button>
         </form>
     </div>
-    <script>
+    <script nonce="{{ $cspNonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         const passwordInput = document.getElementById('password');
         const passwordRequirements = document.getElementById('password-requirements');

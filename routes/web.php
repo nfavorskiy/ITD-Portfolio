@@ -11,9 +11,8 @@ Route::get('/', function () {
 })->name('home');
 
 Route::post('/check-name-availability', function (Request $request) {
-    $name = (string) $request->input('name'); // Force to string
+    $name = (string) $request->input('name');
     
-    // Additional validation to ensure we have a valid name
     if (empty(trim($name))) {
         return response()->json(['available' => true]);
     }
@@ -23,7 +22,7 @@ Route::post('/check-name-availability', function (Request $request) {
     return response()->json([
         'available' => !$exists
     ]);
-})->name('check.name.availability');
+})->name('check.name.availability')->middleware('throttle:20,1');
 
 Route::post('/check-email-availability', function (Request $request) {
     $email = (string) $request->input('email');
@@ -37,7 +36,7 @@ Route::post('/check-email-availability', function (Request $request) {
     return response()->json([
         'available' => !$exists
     ]);
-})->name('check.email.availability');
+})->name('check.email.availability')->middleware('throttle:20,1');
 
 // Only authenticated users can access these routes
 Route::middleware(['auth', 'verified'])->group(function () {

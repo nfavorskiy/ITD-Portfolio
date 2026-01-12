@@ -21,7 +21,7 @@
         {{-- Success notification --}}
         @if (session('status'))
             <div class="alert alert-success">{{ session('status') }}</div>
-            <script>
+            <script nonce="{{ $cspNonce }}">
                 if (window.history.replaceState) {
                     window.history.replaceState(null, '', '/');
                 }
@@ -67,7 +67,7 @@
         </form>
     </div>
 
-    <script>
+    <script nonce="{{ $cspNonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         const emailInput = document.getElementById('email');
         const emailFeedback = document.getElementById('email-feedback');
@@ -75,13 +75,10 @@
         const passwordFeedback = document.getElementById('password-feedback');
         const loginBtn = document.getElementById('login-btn');
 
-        // Check if there are server errors
         const hasServerErrors = document.querySelectorAll('.server-error').length > 0;
         
-        // Auto-dismiss error notification after 8 seconds
         const errorNotification = document.getElementById('login-error-notification');
         if (errorNotification) {
-            // Manual close functionality
             const closeBtn = errorNotification.querySelector('.btn-close');
             if (closeBtn) {
                 closeBtn.addEventListener('click', function() {
@@ -89,7 +86,6 @@
                 });
             }
             
-            // Auto-dismiss after 8 seconds
             setTimeout(() => {
                 if (errorNotification && errorNotification.parentNode) {
                     errorNotification.remove();
@@ -97,7 +93,6 @@
             }, 8000);
         }
 
-        // Function to hide server error for a specific field
         function hideServerError(fieldName) {
             const serverError = document.querySelector(`.server-error[data-field="${fieldName}"]`);
             if (serverError) {
@@ -105,7 +100,6 @@
             }
         }
 
-        // Function to show client feedback if no server error is visible
         function showClientFeedback(fieldName, feedbackElement) {
             const serverError = document.querySelector(`.server-error[data-field="${fieldName}"]`);
             const serverErrorVisible = serverError && serverError.style.display !== 'none';
@@ -115,14 +109,11 @@
             }
         }
 
-        // Email validation
         emailInput.addEventListener('input', function() {
             const email = this.value.trim();
             
-            // Hide server error when user starts typing
             hideServerError('email');
             
-            // Reset feedback
             emailFeedback.style.display = 'none';
             emailInput.classList.remove('is-invalid', 'is-valid');
             updateLoginButton();
@@ -136,7 +127,6 @@
                 return;
             }
             
-            // Email format validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 emailFeedback.textContent = 'Please enter a valid email address.';
@@ -147,7 +137,6 @@
                 return;
             }
             
-            // Valid email
             emailFeedback.textContent = '✓ Valid email format';
             emailFeedback.className = 'small mt-1 text-success';
             showClientFeedback('email', emailFeedback);
@@ -155,14 +144,11 @@
             updateLoginButton();
         });
 
-        // Password validation
         passwordInput.addEventListener('input', function() {
             const password = this.value;
             
-            // Hide server error when user starts typing
             hideServerError('password');
             
-            // Reset feedback
             passwordFeedback.style.display = 'none';
             passwordInput.classList.remove('is-invalid', 'is-valid');
             updateLoginButton();
@@ -176,7 +162,6 @@
                 return;
             }
             
-            // Valid password (just check it's not empty for login)
             passwordFeedback.textContent = '✓ Password entered';
             passwordFeedback.className = 'small mt-1 text-success';
             showClientFeedback('password', passwordFeedback);
@@ -188,7 +173,6 @@
             const emailInvalid = emailInput.classList.contains('is-invalid');
             const passwordInvalid = passwordInput.classList.contains('is-invalid');
             
-            // If there are server errors, allow submission to show them
             const hasVisibleServerErrors = Array.from(document.querySelectorAll('.server-error'))
                 .some(error => error.style.display !== 'none');
             
@@ -200,7 +184,6 @@
             loginBtn.disabled = emailInvalid || passwordInvalid;
         }
 
-        // Initial button state
         updateLoginButton();
     });
     </script>

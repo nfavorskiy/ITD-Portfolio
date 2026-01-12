@@ -4,85 +4,139 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class PostController extends Controller
 {
-    public function apiIndex(Request $request)
+    use AuthorizesRequests;
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
     {
-        if ($request->has('mine') && auth()->check()) {
-            $posts = Post::where('user_id', auth()->id())->orderBy('created_at', 'desc')->get();
-        } else {
-            $posts = Post::orderBy('created_at', 'desc')->get();
-        }
-        return response()->json($posts);
-    }
-    
-    public function index(Request $request)
-    {
-        if ($request->has('mine') && auth()->check()) {
-            $posts = Post::where('user_id', auth()->id())->get();
-        } else {
-            $posts = Post::all();
-        }
-        return view('posts.index', compact('posts'));
+        $this->authorize('viewAny', Post::class);
+
+        return view('posts.index');
     }
 
+    /**
+     * API endpoint for paginated posts.
+     */
+    public function apiIndex(Request $request)
+    {
+        $this->authorize('viewAny', Post::class);
+
+        $query = Post::with('user:id,name,is_admin')
+            ->select('id', 'title', 'content', 'user_id', 'created_at', 'updated_at')
+            ->orderBy('created_at', 'desc');
+
+        if ($request->has('mine') && $request->mine == '1' && auth()->check()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $perPage = $request->get('per_page', 10);
+        $posts = $query->paginate($perPage);
+
+        $posts->getCollection()->transform(function ($post) {
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'content' => $post->content,
+                'user_id' => $post->user_id,
+                'author_name' => $post->user ? $post->user->name : 'Deleted User',
+                'author_is_admin' => $post->user ? $post->user->is_admin : false,
+                'created_at' => $post->created_at,
+                'updated_at' => $post->updated_at,
+            ];
+        });
+
+        return response()->json($posts);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
+        $this->authorize('create', Post::class);
+
         return view('posts.create');
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $request->validate([
+        $this->authorize('create', Post::class);
+
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
         ]);
 
-        Post::create([
-            'title' => $request->title,
-            'content' => $request->content,
-            'user_id' => auth()->id(),
-        ]);
+        $post = new Post($validated);
+        $post->user_id = auth()->id();
+        $post->save();
 
-        return redirect()->route('posts.index')->with('post_created', 'Post created successfully!');
+        return redirect()->route('posts.show', $post)
+            ->with('success', 'Post created successfully.');
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(Post $post)
     {
+        $this->authorize('view', $post);
+
+        $post->load('user:id,name,is_admin');
+
+        $post->author_name = $post->user ? $post->user->name : 'Deleted User';
+        $post->author_is_admin = $post->user ? $post->user->is_admin : false;
+
         return view('posts.show', compact('post'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(Post $post)
     {
-        if (auth()->user()->id !== $post->user_id && !auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $post);
+
         return view('posts.edit', compact('post'));
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, Post $post)
     {
-        if (auth()->user()->id !== $post->user_id && !auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $post);
 
-        $request->validate([
-            'title' => 'required',
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
         ]);
 
-        $post->update($request->all());
+        $post->update($validated);
 
-        return redirect()->route('posts.index')->with('post_updated', 'Post updated.');
+        return redirect()->route('posts.show', $post)
+            ->with('success', 'Post updated successfully.');
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(Post $post)
     {
-        if (auth()->user()->id !== $post->user_id && !auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized action.');
-        }
-        
+        $this->authorize('delete', $post);
+
         $post->delete();
-        return redirect()->route('posts.index')->with('post_deleted', 'Post deleted.');
+
+        return redirect()->route('posts.index')
+            ->with('success', 'Post deleted successfully.');
     }
 }

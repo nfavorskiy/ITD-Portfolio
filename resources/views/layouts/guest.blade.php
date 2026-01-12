@@ -2,14 +2,15 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name', 'Laravel') }}</title>
     
-    <!-- Bootstrap CSS (if not already included elsewhere) -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Custom styles for thicker form borders -->
-    <style>
+    <style nonce="{{ $cspNonce }}">
         .form-control {
             border-width: 2px !important;
             border-color: #6c757d !important;
@@ -35,5 +36,10 @@
     <main class="py-4">
         {{ $slot }}
     </main>
+
+    <!-- Bootstrap JS -->
+    <script nonce="{{ $cspNonce }}" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    @stack('scripts')
 </body>
 </html>

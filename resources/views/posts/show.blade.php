@@ -33,21 +33,17 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h1 class="mb-0">{{ $post->title }}</h1>
             <div class="d-flex gap-2">
-                @if(auth()->check())
-                    {{-- Only post author can edit --}}
-                    @if(auth()->user()->id === $post->user_id)
-                        <a href="{{ route('posts.edit', $post) }}" class="btn btn-sm btn-primary">Edit</a>
-                    @endif
-                    
-                    {{-- Post author OR admin can delete --}}
-                    @if(auth()->user()->id === $post->user_id || auth()->user()->isAdmin())
-                        <form method="POST" action="{{ route('posts.destroy', $post) }}" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this post?')">Delete</button>
-                        </form>
-                    @endif
-                @endif
+                @can('update', $post)
+                    <a href="{{ route('posts.edit', $post) }}" class="btn btn-sm btn-primary">Edit</a>
+                @endcan
+                
+                @can('delete', $post)
+                    <form method="POST" action="{{ route('posts.destroy', $post) }}" class="d-inline delete-form">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                @endcan
             </div>
         </div>
         <div class="card-body">
@@ -92,24 +88,39 @@
             </div>
         </div>
         <div class="card-footer">
-            <a href="{{ route('posts.index') }}" class="btn btn-secondary">
+            <button type="button" class="btn btn-secondary back-btn">
                 <i class="bi bi-arrow-left me-1"></i>
                 Back to Posts
-            </a>
+            </button>
         </div>
     </div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 document.addEventListener('DOMContentLoaded', function() {
-    // Convert all timestamps to user's local timezone
+    // Back button
+    document.querySelector('.back-btn').addEventListener('click', function() {
+        history.back();
+    });
+
+    // Delete form confirmation
+    const deleteForm = document.querySelector('.delete-form');
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', function(e) {
+            if (!confirm('Delete this post?')) {
+                e.preventDefault();
+            } else {
+                window.history.replaceState(null, '', '{{ route('posts.index') }}');
+            }
+        });
+    }
+
+    // Convert UTC times to local
     const timeElements = document.querySelectorAll('.local-time');
-    
     timeElements.forEach(function(element) {
         const utcTime = element.getAttribute('data-utc');
         const localDate = new Date(utcTime);
         
-        // Format the date in user's local timezone
         const options = {
             year: 'numeric',
             month: 'short',
@@ -119,8 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
             hour12: true
         };
         
-        const localTimeString = localDate.toLocaleString('en-US', options);
-        element.textContent = localTimeString;
+        element.textContent = localDate.toLocaleString('en-US', options);
     });
 });
 </script>
