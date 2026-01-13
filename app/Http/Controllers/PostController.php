@@ -38,6 +38,13 @@ class PostController extends Controller
         $perPage = $request->get('per_page', 10);
         $posts = $query->paginate($perPage);
 
+        // Redirect logic: if requested page > last page, redirect to last page
+        $currentPage = (int) $request->get('page', 1);
+        $lastPage = $posts->lastPage();
+        if ($currentPage > $lastPage && $lastPage > 0) {
+            return redirect()->to($request->url() . '?page=' . $lastPage . '&per_page=' . $perPage);
+        }
+
         $posts->getCollection()->transform(function ($post) {
             return [
                 'id' => $post->id,
