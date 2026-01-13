@@ -20,7 +20,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return false;
+        return $user->id === $model->id;
     }
 
     /**
@@ -28,7 +28,8 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        // Allow any authenticated user to create an account
+        return true;
     }
 
     /**
@@ -36,7 +37,8 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return false;
+        // Allow users to update their own profile
+        return $user->id === $model->id;
     }
 
     /**
@@ -44,7 +46,8 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        return false;
+        // Allow users to delete their own account
+        return $user->id === $model->id;
     }
 
     /**
@@ -52,7 +55,8 @@ class UserPolicy
      */
     public function restore(User $user, User $model): bool
     {
-        return false;
+        // Allow users to restore their own account
+        return $user->id === $model->id;
     }
 
     /**
@@ -60,6 +64,7 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model): bool
     {
-        return false;
+        // Allow users to permanently delete their own account
+        return $user->id === $model->id;
     }
 }
