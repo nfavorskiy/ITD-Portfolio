@@ -4,15 +4,14 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class SecurityHeaders
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $nonce = base64_encode(Str::random(32));
-        view()->share('cspNonce', $nonce);
+        // Get the nonce generated in AppServiceProvider
+        $nonce = $request->attributes->get('cspNonce');
 
         $response = $next($request);
 
@@ -37,7 +36,7 @@ class SecurityHeaders
         return $response;
     }
 
-    private function buildCspPolicy(string $nonce): string
+    private function buildCspPolicy(?string $nonce): string
     {
         $isLocal = config('app.env') === 'local';
 
