@@ -32,6 +32,8 @@
     color: white !important;
 }
 
-html {
-    overflow-y: scroll;
+.scroll-content {
+    max-height: calc(100vh - 15rem);
+    overflow-y: auto;
+    padding-right: 0.5rem; /* optional, for scrollbar space */
 }

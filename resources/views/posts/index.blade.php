@@ -14,19 +14,21 @@
             <a href="{{ route('posts.create') }}" class="btn btn-primary">Add Post</a>
         @endcan
     </div>
-    <ul id="posts-list" class="list-group list-group-flush">
-        <li id="loading-indicator" class="list-group-item text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-3 mb-0 text-muted">Loading posts...</p>
-        </li>
-    </ul>
+    <div class="scroll-content">
+        <ul id="posts-list" class="list-group list-group-flush">
+            <li id="loading-indicator" class="list-group-item text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 mb-0 text-muted">Loading posts...</p>
+            </li>
+        </ul>
 
-    <nav id="pagination-container" class="mt-4 d-none" aria-label="Posts pagination">
-        <ul class="pagination justify-content-center mb-0"></ul>
-        <p id="pagination-info" class="text-center text-muted mt-2 small"></p>
-    </nav>
+        <nav id="pagination-container" class="mt-4 d-none" aria-label="Posts pagination">
+            <ul class="pagination justify-content-center mb-0"></ul>
+            <p id="pagination-info" class="text-center text-muted mt-2 small"></p>
+        </nav>
+    </div>
 </div>
 
 <style nonce="{{ $cspNonce }}">
