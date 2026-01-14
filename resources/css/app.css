@@ -31,3 +31,7 @@
     text-decoration: none;
     color: white !important;
 }
+
+html {
+    overflow-y: scroll;
+}
