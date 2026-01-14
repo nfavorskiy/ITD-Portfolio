@@ -25,7 +25,12 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Create Post</button>
-        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
+        <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
     </form>
 </div>
+<script nonce="{{ $cspNonce }}">
+    document.getElementById('cancel-btn').addEventListener('click', function() {
+        history.back();
+    });
+</script>
 @endsection
