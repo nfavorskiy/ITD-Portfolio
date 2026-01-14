@@ -31,7 +31,7 @@
             <textarea name="content" id="content" class="form-control" rows="5">{{ $post->content }}</textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary">Create Post</button>
+        <button type="submit" class="btn btn-primary">Update Post</button>
         <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
     </form>
 </div>
