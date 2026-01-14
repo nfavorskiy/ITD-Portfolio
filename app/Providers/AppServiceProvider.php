@@ -55,13 +55,6 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
-        // CSP Nonce generation
-        view()->composer('*', function ($view) {
-            $nonce = bin2hex(random_bytes(16));
-            $view->with('cspNonce', $nonce);
-            request()->attributes->set('cspNonce', $nonce);
-        });
-
         // Nonce directive for CSP
         Blade::directive('nonce', function () {
             return '<?php echo "nonce=\"" . ($cspNonce ?? "") . "\""; ?>';

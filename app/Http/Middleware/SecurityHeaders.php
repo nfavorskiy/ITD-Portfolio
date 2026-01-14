@@ -10,8 +10,12 @@ class SecurityHeaders
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Get the nonce generated in AppServiceProvider
-        $nonce = $request->attributes->get('cspNonce');
+        // Generate a nonce at the start of the request
+        $nonce = bin2hex(random_bytes(16));
+        $request->attributes->set('cspNonce', $nonce);
+
+        // Share the nonce with all views
+        view()->share('cspNonce', $nonce);
 
         $response = $next($request);
 
@@ -58,7 +62,7 @@ class SecurityHeaders
         // Production - strict with nonces
         return implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'nonce-{$nonce}' https://cdn.jsdelivr.net",
+            "script-src 'self' 'nonce-{$nonce}' 'sha256-xick7prUZzKNAFUrQWaOA9KU5W1REBpKdlvmWMXf48s=' https://cdn.jsdelivr.net",
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com",
             "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:",
             "img-src 'self' data: https:",
