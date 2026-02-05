@@ -9,7 +9,7 @@ class RegistrationSqlInjectionTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_prevents_sql_injection_on_registration()
     {
         $maliciousEmail = "test@example.com'); DROP TABLE users; --";
@@ -18,15 +18,16 @@ class RegistrationSqlInjectionTest extends TestCase
         $response = $this->post(route('register'), [
             'name' => $maliciousName,
             'email' => $maliciousEmail,
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ]);
 
-        // Registration should fail due to invalid email, but not SQL injection
+        // Registration should fail due to invalid input
         $this->assertDatabaseMissing('users', [
             'email' => $maliciousEmail,
         ]);
 
+        // Tables should still exist
         $this->assertTrue(\Schema::hasTable('users'));
         $this->assertTrue(\Schema::hasTable('posts'));
     }

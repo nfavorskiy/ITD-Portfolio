@@ -68,7 +68,7 @@
                                 $youLabel = ' (Beginner)';
                             }
                         @endphp
-                        <strong class="{{ $authorClass }}" style="{{ $authorStyle }}">{!! e($authorName) . $youLabel !!}</strong>
+                        <strong class="{{ $authorClass }}" style="{{ $authorStyle }}">{{ $authorName . $youLabel }}</strong>
                     </span>
                     <span class="me-3">
                         <i class="bi bi-calendar-plus me-1"></i>

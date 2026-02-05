@@ -94,7 +94,48 @@ The application implements strict access control to prevent unauthorized access:
 
 ## Security Enhancements
 
-### 1. Content Security Policy (CSP)
+### 1. Input Validation & XSS Prevention
+
+Prevents Cross-Site Scripting (XSS) attacks through strict input validation on user-generated content.
+
+**Username Sanitization:**
+```php
+// Registration & Profile Updates
+'name' => [
+    'required',
+    'string',
+    'max:255',
+    'regex:/^[a-zA-Z0-9\s\-\_\.]+$/', // Only alphanumeric + safe characters
+]
+```
+
+**Defense in Depth Strategy:**
+
+| Layer | Implementation | Purpose |
+|-------|---------------|---------|
+| **Input Validation** | Server-side regex validation | Rejects HTML/JavaScript at registration and profile updates |
+| **Client-side Validation** | Real-time JavaScript validation | Immediate user feedback, prevents submission of invalid data |
+| **Output Escaping** | Blade `{{ }}` syntax | Escapes HTML entities if validation bypassed |
+| **CSP Headers** | Nonce-based script execution | Blocks script execution as final defense layer |
+
+**What It Blocks:**
+- ❌ `<script>alert('XSS')</script>`
+- ❌ `<a href="https://phishing.com">Click here</a>`
+- ❌ `<img src=x onerror="alert(1)">`
+- ❌ `<iframe src="https://evil.com"></iframe>`
+
+**What It Allows:**
+- ✅ `John_Doe-123`
+- ✅ `User 2024`
+- ✅ `admin.user`
+
+**Files:**
+- `app/Http/Controllers/Auth/RegisteredUserController.php`
+- `app/Http/Requests/ProfileUpdateRequest.php`
+- `resources/views/auth/register.blade.php` (client-side)
+- `resources/views/profile/partials/update-profile-information-form.blade.php` (client-side)
+
+### 2. Content Security Policy (CSP)
 
 Prevents XSS attacks by controlling which scripts can execute.
 
@@ -106,7 +147,7 @@ Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{random}';
 - **No inline event handlers** - All JavaScript uses `addEventListener()`
 - **Strict source restrictions** - External resources explicitly whitelisted
 
-### 2. HTTP Security Headers
+### 3. HTTP Security Headers
 
 All responses include:
 
@@ -118,7 +159,7 @@ All responses include:
 | `X-XSS-Protection`          | `1; mode=block`                                | Legacy XSS filter      |
 | `Referrer-Policy`           | `strict-origin-when-cross-origin`              | Controls referrer info |
 
-### 3. Authentication Security
+### 4. Authentication Security
 
 | Feature                          | Implementation                                  |
 | -------------------------------- | ----------------------------------------------- |
@@ -128,7 +169,7 @@ All responses include:
 | **CSRF Protection**        | All forms protected with CSRF tokens            |
 | **Password Confirmation**  | Required for sensitive actions (delete account) |
 
-### 4. Authorization with Laravel Policies
+### 5. Authorization with Laravel Policies
 
 ```php
 // PostPolicy.php
@@ -147,13 +188,13 @@ public function delete(User $user, Post $post): bool
 - **Controller integration** - `$this->authorize('update', $post)`
 - **Blade directives** - `@can('update', $post)` for UI
 
-### 5. IDOR Prevention
+### 6. IDOR Prevention
 
 - **No client-supplied IDs for ownership** - Profile actions use `auth()->user()`
 - **Policy checks on every action** - Edit, update, delete all verified
 - **Route model binding** - Laravel validates resource exists before policy check
 
-### 6. Soft Delete for Users
+### 7. Soft Delete for Users
 
 When users delete their account:
 
@@ -161,7 +202,7 @@ When users delete their account:
 - Email/username are **anonymized** to allow re-registration
 - No orphaned data or broken foreign keys
 
-### 7. HTTPS Enforcement
+### 8. HTTPS Enforcement
 
 ```php
 // Production only
@@ -177,7 +218,7 @@ if (Request::getHost() === 'itdportfolio-laravel.blog') {
 
 ## Tech Stack
 
-- **Backend:** Laravel 11 (PHP 8.2+)
+- **Backend:** Laravel 12 (PHP 8.4.8)
 - **Frontend:** Bootstrap 5, Alpine.js
 - **Database:** MySQL (production), SQLite (testing)
 - **Build:** Vite

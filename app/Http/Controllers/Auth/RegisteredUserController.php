@@ -44,6 +44,7 @@ class RegisteredUserController extends Controller
                     'string', 
                     'max:255', 
                     'min:1',  // Allow single character names
+                    'regex:/^[a-zA-Z0-9\s\-\_\.]+$/',
                     'unique:'.User::class
                 ],
                 'email' => [
@@ -73,6 +74,7 @@ class RegisteredUserController extends Controller
                 // Custom error messages
                 'name.unique' => 'This name is already taken. Please choose a different name.',
                 'name.max' => 'Username is too long. Please choose a username with 255 characters or fewer.',
+                'name.regex' => 'Username can only contain letters, numbers, spaces, hyphens, underscores, and dots.',
                 'email.unique' => 'This email is already registered. Please use a different email address.',
                 'name.required' => 'Please enter your username.',
                 'email.required' => 'Please enter your email address.',

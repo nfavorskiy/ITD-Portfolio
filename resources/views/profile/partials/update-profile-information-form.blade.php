@@ -68,15 +68,24 @@ document.addEventListener('DOMContentLoaded', function() {
         nameInput.classList.remove('is-invalid', 'is-valid');
         
         if (name.length === 0) {
-            nameFeedback.textContent = 'Please enter your name.';
+            nameFeedback.textContent = 'Please enter your username.';
             nameFeedback.className = 'small mt-1 text-danger';
             nameFeedback.style.display = 'block';
             nameInput.classList.add('is-invalid');
-        } else {
-            nameFeedback.textContent = '✓ Name is valid';
-            nameFeedback.className = 'small mt-1 text-success';
-            nameFeedback.style.display = 'block';
-            nameInput.classList.add('is-valid');
+        } 
+        else {
+            const nameRegex = /^[a-zA-Z0-9\s\-\_\.]+$/;
+            if (!nameRegex.test(name)) {
+                nameFeedback.textContent = 'Username can only contain letters, numbers, spaces, hyphens, underscores, and dots.';
+                nameFeedback.className = 'small mt-1 text-danger';
+                nameFeedback.style.display = 'block';
+                nameInput.classList.add('is-invalid');
+            } else {
+                nameFeedback.textContent = '✓ Name is valid';
+                nameFeedback.className = 'small mt-1 text-success';
+                nameFeedback.style.display = 'block';
+                nameInput.classList.add('is-valid');
+            }
         }
         updateSaveButton();
     });

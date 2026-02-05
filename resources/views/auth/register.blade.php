@@ -166,6 +166,16 @@
                 updateRegisterButton();
                 return;
             }
+
+            const nameRegex = /^[a-zA-Z0-9\s\-\_\.]+$/;
+            if (!nameRegex.test(name)) {
+                nameFeedback.textContent = 'Username can only contain letters, numbers, spaces, hyphens, underscores, and dots.';
+                nameFeedback.className = 'small mt-1 text-danger';
+                showClientFeedback('name', nameFeedback);
+                nameInput.classList.add('is-invalid');
+                updateRegisterButton();
+                return;
+    }
             
             if (nameLoading) nameLoading.style.display = 'block';
             
@@ -194,6 +204,16 @@
                 nameInput.classList.add('is-invalid');
                 if (nameLoading) nameLoading.style.display = 'none';
                 updateRegisterButton();
+            }
+
+            const nameRegex = /^[a-zA-Z0-9\s\-\_\.]+$/;
+            if (!nameRegex.test(name)) {
+                nameFeedback.textContent = 'Username can only contain letters, numbers, spaces, hyphens, underscores, and dots.';
+                nameFeedback.className = 'small mt-1 text-danger';
+                showClientFeedback('name', nameFeedback);
+                nameInput.classList.add('is-invalid');
+                updateRegisterButton();
+                return;
             }
         });
 

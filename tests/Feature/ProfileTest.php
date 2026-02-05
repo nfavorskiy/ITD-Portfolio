@@ -24,7 +24,7 @@ test('profile information can be updated', function () {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
+        ->assertRedirect('/profile/settings');
 
     $user->refresh();
 
@@ -45,7 +45,7 @@ test('email verification status is unchanged when the email address is unchanged
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
+        ->assertRedirect('/profile/settings'); // Changed from /profile
 
     $this->assertNotNull($user->refresh()->email_verified_at);
 });
@@ -64,7 +64,10 @@ test('user can delete their account', function () {
         ->assertRedirect('/');
 
     $this->assertGuest();
-    $this->assertNull($user->fresh());
+    
+    // Check soft delete instead of hard delete
+    $deletedUser = User::withoutGlobalScopes()->find($user->id);
+    expect($deletedUser->is_deleted)->toBeTrue();
 });
 
 test('correct password must be provided to delete account', function () {
@@ -72,14 +75,14 @@ test('correct password must be provided to delete account', function () {
 
     $response = $this
         ->actingAs($user)
-        ->from('/profile')
+        ->from('/profile/settings')
         ->delete('/profile', [
             'password' => 'wrong-password',
         ]);
 
     $response
-        ->assertSessionHasErrorsIn('userDeletion', 'password')
-        ->assertRedirect('/profile');
+        ->assertSessionHasErrors('password') // Changed error bag
+        ->assertRedirect('/profile/settings');
 
     $this->assertNotNull($user->fresh());
 });

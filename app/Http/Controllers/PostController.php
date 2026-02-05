@@ -79,8 +79,15 @@ class PostController extends Controller
         $this->authorize('create', Post::class);
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z0-9\s\-\_\.\,\!\?\'\"\:\;]+$/', // Alphanumeric + common punctuation
+            ],
             'content' => 'required|string',
+        ], [
+            'title.regex' => 'Title can only contain letters, numbers, spaces, and common punctuation (.,!?\'":-_).',
         ]);
 
         $post = new Post($validated);
@@ -124,8 +131,15 @@ class PostController extends Controller
         $this->authorize('update', $post);
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z0-9\s\-\_\.\,\!\?\'\"\:\;]+$/',
+            ],
             'content' => 'required|string',
+        ], [
+            'title.regex' => 'Title can only contain letters, numbers, spaces, and common punctuation (.,!?\'":-_).',
         ]);
 
         $post->update($validated);
